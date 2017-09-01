@@ -11,14 +11,14 @@ var eighthVolume = 0;
 var sixteenthVolume = 0;
 var tripletVolume = 0;
 var lookahead = 25.0;       // How frequently to call scheduling function
-                            //(in milliseconds)
+//(in milliseconds)
 var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
-                            // This is calculated from lookahead, and overlaps
-                            // with next interval (in case the timer is late)
+// This is calculated from lookahead, and overlaps
+// with next interval (in case the timer is late)
 var nextNoteTime = 0.0;     // when the next note is due.
 var noteLength = 0.05;      // length of "beep" (in seconds)
 var notesInQueue = [];      // the notes that have been put into the web audio,
-                            // and may or may not have played yet. {note, time}
+// and may or may not have played yet. {note, time}
 var timerWorker = null;     // The Web Worker used to fire timer messages
 
 function maxBeats() {
@@ -68,7 +68,7 @@ function scheduleNote(beatNumber, time) {
   } else if (beatNumber % 4 === 0) {
     osc.frequency.value = 300.0;
     gainNode.gain.value = calcVolume(tripletVolume);
-  } else if (beatNumber % 3 === 0 ) {                    // other 16th notes = low pitch
+  } else if (beatNumber % 3 === 0) {                    // other 16th notes = low pitch
     osc.frequency.value = 220.0;
     gainNode.gain.value = calcVolume(sixteenthVolume);
   } else {
@@ -80,12 +80,15 @@ function scheduleNote(beatNumber, time) {
 }
 
 function scheduler() {
-  while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-    scheduleNote( currentTwelveletNote, nextNoteTime );
+  while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
+    scheduleNote(currentTwelveletNote, nextNoteTime);
     nextTwelvelet();
   }
 }
 
+/**
+ * Entry point to the app.
+ */
 function play() {
   isPlaying = !isPlaying;
 
@@ -100,11 +103,14 @@ function play() {
   }
 }
 
-function init(){
+/**
+ * Initialization on window.load.
+ */
+function init() {
   audioContext = new AudioContext();
   timerWorker = new Worker("assets/js/worker.js");
 
-  timerWorker.onmessage = function(e) {
+  timerWorker.onmessage = function (e) {
     if (e.data == "tick") {
       scheduler();
     } else {
@@ -112,7 +118,7 @@ function init(){
     }
   };
 
-  timerWorker.postMessage({"interval":lookahead});
+  timerWorker.postMessage({ "interval": lookahead });
 }
 
-window.addEventListener("load", init );
+window.addEventListener("load", init);
